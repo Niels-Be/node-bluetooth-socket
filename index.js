@@ -1,6 +1,6 @@
 const stream = require('stream');
 const ErrNo = require('errno')
-const BluetoothFd = require('../build/Release/BluetoothFd.node');
+const BluetoothFd = require('./build/Release/BluetoothFd.node');
 
 class BluetoothSocket extends stream.Duplex {
 
