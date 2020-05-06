@@ -1,0 +1,34 @@
+{
+  "name": "bluetooth-socket",
+  "version": "0.1.0",
+  "description": "Node.JS Socket for communication with AF_BLUETOOTH sockets",
+  "keywords": [
+    "bluez",
+    "bluez5",
+    "bluetooth",
+    "socket"
+  ],
+  "main": "index.js",
+  "types": "types.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp configure build"
+  },
+  "author": "WaeCo <aaqqws@googlemail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/waeco/node-bluetooth-socket#readme",
+  "dependencies": {
+    "errno": "^0.1.5",
+    "nan": "^2.14.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/waeco/node-bluetooth-socket.git"
+  },
+  "bugs": {
+    "url": "https://github.com/waeco/node-bluetooth-socket/issues"
+  },
+  "os": [
+    "linux"
+  ]
+}
