@@ -14,7 +14,7 @@ using namespace v8;
 Nan::Persistent<FunctionTemplate> BluetoothFd::constructor_template;
 
 BluetoothFd::BluetoothFd(int fd, const Local<Function>& readCallback) :
-  node::ObjectWrap(),
+  Nan::ObjectWrap(),
   _fd(fd),
   _readCallback(readCallback),
   isReading(false) {
@@ -115,14 +115,14 @@ NAN_METHOD(BluetoothFd::New) {
   
   BluetoothFd* p = new BluetoothFd(fd, arg1.As<Function>());
   p->Wrap(info.This());
-  p->This.Reset(info.This());
+  //p->This.Reset(info.This());
   info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(BluetoothFd::Start) {
   Nan::HandleScope scope;
 
-  BluetoothFd* p = node::ObjectWrap::Unwrap<BluetoothFd>(info.This());
+  BluetoothFd* p = Nan::ObjectWrap::Unwrap<BluetoothFd>(info.Holder());
 
   p->start();
 
@@ -132,7 +132,7 @@ NAN_METHOD(BluetoothFd::Start) {
 NAN_METHOD(BluetoothFd::Stop) {
   Nan::HandleScope scope;
 
-  BluetoothFd* p = node::ObjectWrap::Unwrap<BluetoothFd>(info.This());
+  BluetoothFd* p = Nan::ObjectWrap::Unwrap<BluetoothFd>(info.Holder());
 
   p->stop();
 
@@ -140,7 +140,7 @@ NAN_METHOD(BluetoothFd::Stop) {
 }
 
 NAN_METHOD(BluetoothFd::Write) {
-  BluetoothFd* p = node::ObjectWrap::Unwrap<BluetoothFd>(info.This());
+  BluetoothFd* p = Nan::ObjectWrap::Unwrap<BluetoothFd>(info.Holder());
 
   if (info.Length() > 0) {
     Local<Value> arg0 = info[0];
@@ -162,7 +162,7 @@ NAN_METHOD(BluetoothFd::Write) {
 }
 
 NAN_METHOD(BluetoothFd::Close) {
-  BluetoothFd* p = node::ObjectWrap::Unwrap<BluetoothFd>(info.This());
+  BluetoothFd* p = Nan::ObjectWrap::Unwrap<BluetoothFd>(info.Holder());
   if(!p->close_()) {
     return Nan::ThrowError(Nan::ErrnoException(errno));
   }
@@ -181,21 +181,21 @@ void BluetoothFd::PollCallback(uv_poll_t* handle, int status, int events) {
   p->poll();
 }
 
-void BluetoothFd::Init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
+NAN_MODULE_INIT(BluetoothFd::Init) {
   Nan::HandleScope scope;
   
   Local<FunctionTemplate> tmpl = Nan::New<FunctionTemplate>(New);
-  constructor_template.Reset(tmpl);
 
-  tmpl->InstanceTemplate()->SetInternalFieldCount(1);
   tmpl->SetClassName(Nan::New("BluetoothFd").ToLocalChecked());
+  tmpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   Nan::SetPrototypeMethod(tmpl, "start", Start);
   Nan::SetPrototypeMethod(tmpl, "stop", Stop);
   Nan::SetPrototypeMethod(tmpl, "write", Write);
   Nan::SetPrototypeMethod(tmpl, "close", Close);
 
-  NAN_EXPORT(module, BluetoothFd::New);
+  constructor_template.Reset(tmpl);
+  Nan::Set(target, Nan::New("BluetoothFd").ToLocalChecked(), Nan::GetFunction(tmpl).ToLocalChecked());
 }
 
 NODE_MODULE(BluetoothFd, BluetoothFd::Init);

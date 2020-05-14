@@ -4,10 +4,10 @@
 #include <node.h>
 #include <nan.h>
 
-class BluetoothFd : public node::ObjectWrap {
+class BluetoothFd : public Nan::ObjectWrap {
 
 public:
-    static void Init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module);
+    static NAN_MODULE_INIT(Init);
     static NAN_METHOD(New);
     static NAN_METHOD(Start);
     static NAN_METHOD(Stop);
