@@ -7,7 +7,6 @@ class BluetoothSocket extends stream.Duplex {
     constructor(fd, options) {
         super(options);
 
-        console.log(typeof BluetoothFd, BluetoothFd);
         this._impl = new BluetoothFd(fd, this.onRead.bind(this));
     }
 
