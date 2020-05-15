@@ -1,6 +1,6 @@
 const stream = require('stream');
 const ErrNo = require('errno')
-const BluetoothFd = require('./build/Release/BluetoothFd.node').BluetoothFd;
+const BluetoothFd = require('bindings')('BluetoothFd').BluetoothFd;
 
 class BluetoothSocket extends stream.Duplex {
 
@@ -20,7 +20,7 @@ class BluetoothSocket extends stream.Duplex {
             const errDesc = ErrNo.errno[ret] || {};
             const err = new Error(errDesc.description || "Code "+ret);
             err.name = "SystemError";
-            err.syscall = "read";
+            err.syscall = "write";
             err.errno = ret;
             err.code = errDesc.code;
         }
