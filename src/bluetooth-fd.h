@@ -1,12 +1,11 @@
 #ifndef ___BLUETOOTH_FD_H___
 #define ___BLUETOOTH_FD_H___
 
-#include <node.h>
 #include <nan.h>
+#include <node.h>
 
 class BluetoothFd : public Nan::ObjectWrap {
-
-public:
+   public:
     static NAN_MODULE_INIT(Init);
     static NAN_METHOD(New);
     static NAN_METHOD(Start);
@@ -14,7 +13,7 @@ public:
     static NAN_METHOD(Write);
     static NAN_METHOD(Close);
 
-private:
+   private:
     BluetoothFd(int fd, const v8::Local<v8::Function>& readCallback);
     ~BluetoothFd();
 
@@ -28,19 +27,18 @@ private:
 
     void emitErrnoError();
 
-    static void PollCloseCallback(uv_poll_t* handle);
     static void PollCallback(uv_poll_t* handle, int status, int events);
 
-private:
-  Nan::Persistent<v8::Object> This;
+   private:
+    Nan::Persistent<v8::Object> This;
 
-  int _fd;
-  Nan::Callback _readCallback;
+    int _fd;
+    Nan::Callback _readCallback;
 
-  bool isReading;
-  uv_poll_t _pollHandle;
-  
-  static Nan::Persistent<v8::FunctionTemplate> constructor_template;
+    bool isReading;
+    uv_poll_t _pollHandle;
+
+    static Nan::Persistent<v8::FunctionTemplate> constructor_template;
 };
 
 #endif
