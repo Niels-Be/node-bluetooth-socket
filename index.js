@@ -2,6 +2,12 @@ const stream = require('stream');
 const ErrNo = require('errno')
 const BluetoothFd = require('bindings')('BluetoothFd').BluetoothFd;
 
+ErrNo.errno[-11] = {
+    "errno": -11,
+    "code": "EAGAIN",
+    "description": "Remote closed the connection",
+};
+
 class BluetoothSocket extends stream.Duplex {
 
     constructor(fd, options) {
@@ -33,13 +39,6 @@ class BluetoothSocket extends stream.Duplex {
 
     onRead(errno, buf) {
         if (errno !== 0) {
-            //TODO emit close event
-            if(errno === 103/*ECONNABORTED*/) {
-                this._impl.stop();
-                this.push(null);
-                return;
-            }
-
             const errDesc = ErrNo.errno[errno] || {};
             const err = new Error(errDesc.description || "Code "+errno);
             err.name = "SystemError";
@@ -47,7 +46,7 @@ class BluetoothSocket extends stream.Duplex {
             err.errno = errno;
             err.code = errDesc.code;
 
-            process.nextTick(() => this.emit('error', err));
+            this.destroy(err);
             return;
         }
         if (!this.push(buf)) {
@@ -56,7 +55,7 @@ class BluetoothSocket extends stream.Duplex {
     }
 
     _destroy(err, cb) {
-        return this._close(cb);
+        return this._close((er) => cb(er || err));
     }
 
     _final(cb) {

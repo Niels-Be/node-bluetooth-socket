@@ -31,12 +31,18 @@ BluetoothFd::~BluetoothFd() {
 void BluetoothFd::start() {
     if (!this->isReading) {
         this->isReading = true;
-        uv_poll_start(&this->_pollHandle, UV_READABLE, BluetoothFd::PollCallback);
+        uv_poll_start(&this->_pollHandle, UV_READABLE | UV_DISCONNECT, BluetoothFd::PollCallback);
     }
 }
 
-void BluetoothFd::poll() {
+void BluetoothFd::poll(int status) {
     Nan::HandleScope scope;
+
+    if(status < 0) {
+        Local<Value> argv[2] = {Nan::New<Number>(status), Nan::Null()};
+        Nan::Call(this->_readCallback, Nan::GetCurrentContext()->Global(), 2, argv);
+        return;
+    }
 
     int length = 0;
     char data[1024];
@@ -48,12 +54,11 @@ void BluetoothFd::poll() {
 
         Nan::Call(this->_readCallback, Nan::GetCurrentContext()->Global(), 2, argv);
     } else {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            // Ignore those
-            return;
-        }
-        Local<Value> argv[2] = {Nan::New<Number>(errno), Nan::Null()};
+        // NOTE: errno = EAGAIN will be set if the remote closed the socket
+        // socket is probably broken so stop polling
+        this->stop();
 
+        Local<Value> argv[2] = {Nan::New<Number>(uv_translate_sys_error(errno)), Nan::Null()};
         Nan::Call(this->_readCallback, Nan::GetCurrentContext()->Global(), 2, argv);
     }
 }
@@ -158,7 +163,7 @@ NAN_METHOD(BluetoothFd::Close) {
 void BluetoothFd::PollCallback(uv_poll_t* handle, int status, int events) {
     BluetoothFd* p = (BluetoothFd*)handle->data;
 
-    p->poll();
+    p->poll(status);
 }
 
 NAN_MODULE_INIT(BluetoothFd::Init) {

@@ -23,7 +23,7 @@ class BluetoothFd : public Nan::ObjectWrap {
     int write_(char* data, int length);
     bool close_();
 
-    void poll();
+    void poll(int status);
 
     void emitErrnoError();
 
