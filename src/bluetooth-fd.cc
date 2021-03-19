@@ -50,15 +50,14 @@ void BluetoothFd::poll(int status) {
     length = read(this->_fd, data, sizeof(data));
 
     if (length > 0) {
-        Local<Value> argv[2] = {Nan::New<Number>(0), Nan::CopyBuffer(data, length).ToLocalChecked()};
+        Local<Value> argv[2] = {Nan::Null(), Nan::CopyBuffer(data, length).ToLocalChecked()};
 
         Nan::Call(this->_readCallback, Nan::GetCurrentContext()->Global(), 2, argv);
     } else {
         // NOTE: errno = EAGAIN will be set if the remote closed the socket
         // socket is probably broken so stop polling
         this->stop();
-
-        Local<Value> argv[2] = {Nan::New<Number>(uv_translate_sys_error(errno)), Nan::Null()};
+        Local<Value> argv[2] = {Nan::ErrnoException(errno, "read"), Nan::Null()};
         Nan::Call(this->_readCallback, Nan::GetCurrentContext()->Global(), 2, argv);
     }
 }
@@ -140,7 +139,7 @@ NAN_METHOD(BluetoothFd::Write) {
             if (res > 0) {
                 info.GetReturnValue().Set(0);
             } else {
-                info.GetReturnValue().Set(errno);
+                info.GetReturnValue().Set(Nan::ErrnoException(errno, "write"));
             }
 
         } else {

@@ -28,12 +28,17 @@ class BluetoothSocket extends stream.Duplex {
 
         let err = null;
         if (ret !== 0) {
-            const errDesc = ErrNo.errno[ret] || {};
-            const err = new Error(errDesc.description || "Code "+ret);
-            err.name = "SystemError";
-            err.syscall = "write";
-            err.errno = ret;
-            err.code = errDesc.code;
+            if(typeof ret === "number") {
+                // if its a number its an libuv error code
+                const errDesc = ErrNo.errno[ret] || {};
+                const err = new Error(errDesc.description || "Code "+ret);
+                err.name = "SystemError";
+                err.syscall = "write";
+                err.errno = ret;
+                err.code = errDesc.code;
+            } else {
+                err = ret;
+            }
         }
         callback(err);
     }
@@ -42,15 +47,18 @@ class BluetoothSocket extends stream.Duplex {
         this._impl.start();
     }
 
-    onRead(errno, buf) {
-        if (errno !== 0) {
-            const errDesc = ErrNo.errno[errno] || {};
-            const err = new Error(errDesc.description || "Code "+errno);
-            err.name = "SystemError";
-            err.syscall = "read";
-            err.errno = errno;
-            err.code = errDesc.code;
-
+    onRead(err, buf) {
+        if (err) {
+            if(typeof err === 'number') {
+                // if its a number its an libuv error code
+                const errno = err;
+                const errDesc = ErrNo.errno[errno] || {};
+                err = new Error(errDesc.description || "Code "+errno);
+                err.name = "SystemError";
+                err.syscall = "read";
+                err.errno = errno;
+                err.code = errDesc.code;
+            }
             this.destroy(err);
             return;
         }
