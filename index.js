@@ -2,6 +2,11 @@ const stream = require('stream');
 const ErrNo = require('errno')
 const BluetoothFd = require('bindings')('BluetoothFd').BluetoothFd;
 
+ErrNo.errno[-9] = {
+    "errno": -9,
+    "code": "EBADF",
+    "description": "Remote closed the connection",
+};
 ErrNo.errno[-11] = {
     "errno": -11,
     "code": "EAGAIN",
