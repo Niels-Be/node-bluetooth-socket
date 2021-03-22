@@ -182,4 +182,14 @@ NAN_MODULE_INIT(BluetoothFd::Init) {
     Nan::Set(target, Nan::New("BluetoothFd").ToLocalChecked(), Nan::GetFunction(tmpl).ToLocalChecked());
 }
 
+// Workaground for cast warning: See: https://github.com/nodejs/nan/issues/807
+#if defined(__GNUC__) && __GNUC__ >= 8
+#define DISABLE_WCAST_FUNCTION_TYPE _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wcast-function-type\"")
+#define DISABLE_WCAST_FUNCTION_TYPE_END _Pragma("GCC diagnostic pop")
+#else
+#define DISABLE_WCAST_FUNCTION_TYPE
+#define DISABLE_WCAST_FUNCTION_TYPE_END
+#endif
+DISABLE_WCAST_FUNCTION_TYPE
 NODE_MODULE(BluetoothFd, BluetoothFd::Init);
+DISABLE_WCAST_FUNCTION_TYPE_END
